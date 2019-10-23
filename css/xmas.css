@@ -1,0 +1,108 @@
+@import url(https://fonts.googleapis.com/css?family=Pacifico);
+
+.navbar-brand {
+	font-family: 'Pacifico',Arial,sans-serif;
+}
+
+.navbar-default,
+.navbar-default .navbar-nav li a,
+.footer .text-muted
+{
+	color: #ccc !important;
+}
+
+.navbar-default .navbar-right,
+.navbar-default .navbar-brand,
+.navbar-default .navbar-nav li a:hover,
+.navbar-default .navbar-nav li.active a
+{
+	color: #fff !important;
+}
+
+.navbar-default {
+	background-color: #dc1108 !important;
+	border-color: #444 !important;
+}
+
+.navbar-default .navbar-nav .active a,
+.footer {
+	background-color: #ca0f08 !important;
+}
+
+.navbar-default .btn-default {
+	color: #fff !important;
+	background-color: #ca0f08 !important;
+	border-color: #fff !important;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+	background-color: #fff !important;
+}
+
+.navbar-default .navbar-toggle:hover,
+.navbar-default .btn-default:hover,
+.panel .btn-default:hover {
+	background-color: #444 !important;
+}
+
+.panel .btn-default {
+	color: #fff !important;
+	background-color: #518742 !important;
+	border-color: #a9c4a0 !important;
+	//background-color: #ca0f08 !important;
+	margin-top: 1px;
+	margin-bottom: 1px;
+}
+
+.panel {
+	border-color: #518742 !important;
+	//border-color: #ca0f08 !important;
+}
+
+.panel-default .panel-heading {
+	color: #fff !important;
+	background-color: #599348 !important;
+	//background-color: #dc1108 !important;
+}
+
+.table thead tr td,
+.table thead tr th,
+.table tbody tr td,
+.table tbody tr th,
+.table tfoot tr td,
+.table tfoot tr th {
+	border-color: #518742 !important;
+}
+
+nav {
+	background: url(../img/section-div.png) repeat-x bottom;
+	min-height: 62px !important;
+}
+
+footer {
+	background: url(../img/section-div.png) repeat-x;
+	height: 70px !important;
+}
+
+footer .container {
+	margin-top: 10px;
+}
+
+html {
+	position: relative;
+}
+
+html:after {
+	content : "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-image: url(../img/11.jpg);
+	width: 100%;
+	height: 100%;
+	opacity : 0.2;
+	z-index: -1;
+	
+	background-size: cover;
+}

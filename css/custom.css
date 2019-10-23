@@ -1,0 +1,46 @@
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
+
+body {
+	font-family: 'Source+Sans+Pro',Arial,sans-serif;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.no-hover:hover {
+  background-color: transparent !important;
+}
+
+.badge {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.alert-success {
+  border-color: #599348 !important;
+  background-color: #fff;
+}
+
+.alert-danger {
+  border-color: #dc1108 !important;
+  background-color: #fff;
+}
+
+.bold {
+  font-weight: 700;
+  color: #599348;
+}
+
+.bold span {
+  background-color: #599348;
+  color: #fff;
+}
+
+a.black {
+  color: #333;
+}
+
+.invisible {
+  display: none;
+}
