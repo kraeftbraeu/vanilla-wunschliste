@@ -2,7 +2,6 @@ export class JwtService
 {
     static decodeJwt(jwt)
     {
-        console.log(jwt);
         let parts = jwt.split('.');
 
         if (parts.length !== 3)

@@ -38,7 +38,7 @@ export class RestService
     static readUsers()
     {
         return fetch(RestService.serverUrl + 'user/', RestService.getRequestOptions(true))
-            .then(response => response.json())
+            .then(RestService.assertValidJsonResponse)
             .catch(RestService.handleError);
     }
 
@@ -65,7 +65,7 @@ export class RestService
 
     static readFiltersForGiver(giverId)
     {
-        return fetch(serverUrl + 'filter/f_giver/' + giverId, RestService.getRequestOptions(true))
+        return fetch(RestService.serverUrl + 'filter/f_giver/' + giverId, RestService.getRequestOptions(true))
             .then(RestService.assertValidJsonResponse)
             .catch(RestService.handleError);
     }
@@ -101,7 +101,8 @@ export class RestService
 
     static handleError(error)
     {
-        console.log("handleError: " + JSON.stringify(error));
+        console.error(error);
+        //console.log("handleError: " + JSON.stringify(error));
         let errorMsg;
         if(error instanceof Response)
         {

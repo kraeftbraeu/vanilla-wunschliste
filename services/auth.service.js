@@ -15,7 +15,6 @@ export class AuthService
             'Access-Control-Allow-Origin': '*',
             'Content-Type': 'application/json'
         };
-        console.log(headers);
         headers.method = 'POST';
         headers.body = {
             user: username,

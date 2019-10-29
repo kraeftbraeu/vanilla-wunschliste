@@ -52,29 +52,7 @@ export class WlHome extends WlElement
 
     connectedCallback()
     {
-        fetch("../mock/login.json")
-        .then(response => response.json())
-        .then(token => {
-            this.wlApp.token = token.token;
-            render(this.template(this.wlApp.currentUser, 2019), this);
-        });
-            /*StorageHandler.storeNewToken(response);
-            console.log(StorageHandler.getCurrentUser());
-            render(this.template(StorageHandler.getCurrentUser(), 2019), this);
-        });*/
-
-        //render(this.template(StorageHandler.getCurrentUser(), 2019), this);
-        /*this.storageHandler.currentUser.subscribe(
-            currentUser => {
-                if(currentUser === null)
-                {
-                    this.alertService.error("Kein angemeldeter Benutzer gefunden. Bitte neu anmelden.");
-                    return;
-                }
-                this.currentUser = currentUser;
-            },
-            error => this.alertService.error(error)
-        );*/
+        render(this.template(this.wlApp.currentUser, 2019), this);
     }
 
     clickedDoubleCheckSubmit()

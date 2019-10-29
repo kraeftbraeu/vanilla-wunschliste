@@ -34,7 +34,7 @@ export default class WlApp extends HTMLElement
                                 <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                                 <span id="jsLoginName">${currentUser.username}</span>
                             </span>
-                            <a type="button" class="btn btn-default" @click=${() => this.openPage('logout')} *ngIf="(currentUser|async)">Logout</a>
+                            <a type="button" class="btn btn-default" @click=${() => this.openPage('login')} *ngIf="(currentUser|async)">Logout</a>
                         </form>`
                     : html``}
                 </div>
@@ -69,6 +69,9 @@ export default class WlApp extends HTMLElement
         }
     }
 
+    set currentUser(currentUser) { localStorage.setItem('cu', JSON.stringify(currentUser)); }
+    get currentUser() { return JSON.parse(localStorage.getItem('cu')); }
+
     set jwt(jwt) {
         this.currentUser.jwt = jwt;
     }
@@ -86,7 +89,6 @@ export default class WlApp extends HTMLElement
         const year = new Date().getFullYear();
         const days = Math.floor((new Date(year, 11, 24).getTime() - new Date().getTime()) / 1000 / 3600 / 24);
         render(this.template(currentUser, year, days), this);
-        console.log("read user", currentUser);
         if(currentUser) {
             const hash = window.location.hash;
             if(hash && hash.length > 1 && hash !== '#login') {
