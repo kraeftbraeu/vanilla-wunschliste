@@ -82,9 +82,14 @@ export class RestService
             .then(RestService.assertValidJsonResponseAndUpdateToken);
     }
 
-    static delete(dbObject, tablename)
+    static delete(dbObject, id, tablename)
     {
-        return this.http.delete(this.serverUrl + tablename + "/" + dbObject.id, RestService.getRequestOptions(false));
+        let headers = RestService.getRequestOptions(false);
+        headers.method = 'DELETE';
+        fetch(RestService.serverUrl + tablename + "/" + id, headers)
+            .then(() => console.log('deleted ' + tablename + ' ' + id))
+            .catch((error) => console.error(error));
+
     }
 
     static deleteWish(wish, isForceDeletion)
@@ -92,7 +97,7 @@ export class RestService
         if(isForceDeletion) {
             let headers = RestService.getRequestOptions(false);
             headers.method = 'DELETE';
-            fetch(this.serverUrl + 'present/p_wish/' + wish.id, headers)
+            fetch(RestService.serverUrl + 'present/p_wish/' + wish.id, headers)
                 .then(() => console.log('deleted presents for wish#' + wish.id))
                 .catch((error) => console.error(error));
         }

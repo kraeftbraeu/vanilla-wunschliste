@@ -9,7 +9,7 @@ import { JwtService } from '../services/jwt.service.js';
 export default class WlApp extends HTMLElement
 {
     get template() {
-        return (currentUser, year, daysLeftToChristmas) => html`
+        return html`
         <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">
@@ -18,11 +18,11 @@ export default class WlApp extends HTMLElement
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <span class="navbar-toggle navbar-right" style="border:0">${currentUser ? currentUser.username : ''}</span>
+                    <span class="navbar-toggle navbar-right" style="border:0">${this.currentUser ? this.currentUser.username : ''}</span>
                     <a class="navbar-brand" href="">Wunschliste</a>
                 </div>
                 <div class="collapse navbar-collapse" id="myNavbar">
-                ${currentUser
+                ${this.currentUser
                     ? html`
                         <ul class="nav navbar-nav">
                             <li class='clickable home login'><a @click=${() => this.openPage('home')}>Start</a></li>
@@ -32,9 +32,9 @@ export default class WlApp extends HTMLElement
                         <form class="navbar-form navbar-right" action="" method="post" role="search">
                             <span id="jsLogoutForm" style="padding-left:15px; padding-right:15px;">
                                 <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                                <span id="jsLoginName">${currentUser.username}</span>
+                                <span id="jsLoginName">${this.currentUser.username}</span>
                             </span>
-                            <a type="button" class="btn btn-default" @click=${() => this.openPage('login')} *ngIf="(currentUser|async)">Logout</a>
+                            <a type="button" class="btn btn-default" @click=${() => this.openPage('login')}>Logout</a>
                         </form>`
                     : html``}
                 </div>
@@ -47,8 +47,8 @@ export default class WlApp extends HTMLElement
         <footer class="footer">
             <div class="container">
                 <p class="text-muted">
-                © Krämer ${year}
-                <span>| ${daysLeftToChristmas} Tage bis Weihnachten</span>
+                © Krämer ${this.year}
+                <span>| ${this.daysLeftToChristmas} Tage bis Weihnachten</span>
                 </p>
             </div>
         </footer>
@@ -80,16 +80,20 @@ export default class WlApp extends HTMLElement
         render(html`<wl-message type=${type} text=${text}></wl-message>`, document.getElementById('wl-message'));
     }
 
+    error(reason, text) {
+        this.message('danger', text);
+        console.log(reason);
+    }
+
     connectedCallback() {
         this.doRendering();
     }
 
     doRendering() {
-        const currentUser = this.currentUser;
-        const year = new Date().getFullYear();
-        const days = Math.floor((new Date(year, 11, 24).getTime() - new Date().getTime()) / 1000 / 3600 / 24);
-        render(this.template(currentUser, year, days), this);
-        if(currentUser) {
+        this.year = new Date().getFullYear();
+        this.daysLeftToChristmas = Math.floor((new Date(this.year, 11, 24).getTime() - new Date().getTime()) / 1000 / 3600 / 24);
+        render(this.template, this);
+        if(this.currentUser) {
             const hash = window.location.hash;
             if(hash && hash.length > 1 && hash !== '#login') {
                 this.openPage(window.location.hash.substr(1));

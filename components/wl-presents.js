@@ -75,23 +75,23 @@ export class WlPresents extends WlElement {
                             html`<tr>
                                 <td>
                                     ${this.selectedPresent && this.selectedPresent == present 
-                                        ? html`<input type="text" placeholder="Beschreibung" value="${this.selectedPresent.description}">`
-                                        : present.description}
+                                        ? html`<input type="text" placeholder="Beschreibung" value="${this.selectedPresent.p_descr}">`
+                                        : present.p_descr}
                                 </td>
                                 <td>
                                     ${this.selectedPresent
                                         ? this.selectedPresent == present
-                                            ? html`<input type="text" placeholder="URL (Optional)" value="${this.selectedPresent.link}">`
-                                            : present.link
+                                            ? html`<input type="text" placeholder="URL (Optional)" value="${this.selectedPresent.p_link}">`
+                                            : present.p_link
                                         : html`
                                             <span>
-                                                <a target="_blank" href="${present.link}">${present.link}</a>
+                                                <a target="_blank" href="${present.p_link}">${present.p_link}</a>
                                             </span>
                                         `}
                                 </td>
                                 <td>
                                     ${this.getGiverForPresent(present)}
-                                    ${present.giverId === currentUserId
+                                    ${present.p_giver === currentUserId
                                         ? this.selectedPresent && this.selectedPresent===present
                                             ? html`
                                                 <button @click=${() => this.clickedSaveEdit(i, present)} class="btn btn-default">
@@ -135,7 +135,7 @@ export class WlPresents extends WlElement {
         const currentUser = this.wlApp.currentUser
         if(currentUser === null)
         {
-            this.wlApp.message('danger', 'Kein angemeldeter Benutzer gefunden. Bitte neu anmelden.');
+            this.wlApp.error('currentUser is null!', 'Kein angemeldeter Benutzer gefunden. Bitte neu anmelden.');
             return;
         }
         this.currentUserId = currentUser.id;
@@ -145,10 +145,9 @@ export class WlPresents extends WlElement {
             this.filteredUserIds = filters.map(
                 filter => filter.f_wisher
             )
-        }).catch(error => {
-            this.wlApp.message('danger', 'Ein Fehler ist aufgetreten');
-            console.error(error);
-        });
+        }).catch(
+            error => this.wlApp.error(error, 'Ein Fehler ist aufgetreten')
+        );
 
         RestService.readUsers().then(users => {
             this.allUsers = users;
@@ -203,14 +202,12 @@ export class WlPresents extends WlElement {
                 render(this.template, this);
 
             })
-            .catch(error => {
-                this.wlApp.message('danger', 'Ein Fehler ist aufgetreten');
-                console.error(error);
-            });
-        }).catch(error => {
-            this.wlApp.message('danger', 'Ein Fehler ist aufgetreten');
-            console.error(error);
-        });
+            .catch(
+                error => this.wlApp.error(error, 'Ein Fehler ist aufgetreten')
+            );
+        }).catch(
+            error => this.wlApp.error(error, 'Ein Fehler ist aufgetreten')
+        );
     }
 
     setChangeFilters()
@@ -247,7 +244,7 @@ export class WlPresents extends WlElement {
                     this.filters.splice(index, 1);
                     this.filteredUserIds.splice(index, 1);
             }).catch(
-                error => this.alertService.error(error)
+                error => this.wlApp.error(error, 'Fehler beim Löschen')
             );
         }
         else
@@ -264,7 +261,7 @@ export class WlPresents extends WlElement {
                     this.filters.push(newFilter);
                     this.filteredUserIds.push(newFilter.f_wisher);
             }).catch(
-                error => this.alertService.error(error)
+                error => this.wlApp.error(error, 'Fehler beim Speichern')
             );
         }
     }
@@ -303,7 +300,7 @@ export class WlPresents extends WlElement {
         ).map(
             p => this.allUsers.find(
                     user => user.u_id === p.p_giver
-                ).p_name
+                ).u_name
         );
     }
 
@@ -316,49 +313,37 @@ export class WlPresents extends WlElement {
 
     clickedSelectWish(wish)
     {
-        this.createPresent({
+        const presentToStore = {
             p_id: null,
-            p_wisher: wish_w_user,
+            p_wisher: wish.w_user,
             p_giver: this.currentUserId,
             p_wish: wish.w_id,
             p_pdescr: wish.w_descr,
             p_plink: wish.w_link
-        });
-    }
-
-    createPresent(present)
-    {
-        RestService.createOrUpdate(present).then(
+        };
+        RestService.createOrUpdate(presentToStore, null, 'present').then(
             result => {
                 present.p_id = result;
                 this.presentsOfCurrentUser.push(present);
                 this.selectedUserPresents.push(present);
                 this.countPresentsByCurrentUserMap.set(present.p_wisher, this.countPresentsByCurrentUserMap.get(present.p_wisher) + 1);
+                render(this.template, this);
         }).catch(
-            error => {
-                this.alertService.error(error);
-            }
+            error => this.wlApp.error(error, 'Fehler beim Speichern')
         );
     }
-
     clickedUnselectWish(wish)
     {
-        this.deletePresent(this.presentsOfCurrentUser.find(
+        const presentToDelete = this.presentsOfCurrentUser.find(
             present => present.p_wish === wish.w_id
-        ));
-    }
-
-    deletePresent(present)
-    {
-        RestService.delete(present).then(
+        );
+        RestService.delete(presentToDelete, 'present').then(
             result => {
                 this.presentsOfCurrentUser.splice(this.presentsOfCurrentUser.findIndex(p => p === present), 1);
                 this.selectedUserPresents.splice(this.selectedUserPresents.findIndex(p => p === present), 1);
                 this.countPresentsByCurrentUserMap.set(present.p_wisher, this.countPresentsByCurrentUserMap.get(present.p_wisher) - 1);
         }).catch(
-            error => {
-                this.alertService.error(error);
-            }
+            error => this.wlApp.error(error, 'Fehler beim Speichern')
         );
     }
 
@@ -390,11 +375,12 @@ export class WlPresents extends WlElement {
             result => {}
         ).catch(
             error => {
-                this.alertService.error(error);
+                this.wlApp.error(error, 'Fehler beim Speichern');
                 present.p_descr = this.oldDescr;
                 present.p_link = this.oldLink;
             },
             () => {
+                console.log(error);
                 this.oldDescr = null;
                 this.oldLink = null;
                 this.selectedPresent = null;
@@ -411,7 +397,7 @@ export class WlPresents extends WlElement {
                 this.countWishesMap.set(present.p_wisher, this.countWishesMap.get(present.p_wisher) - 1);
                 this.countPresentsByCurrentUserMap.set(present.p_wisher, this.countPresentsByCurrentUserMap.get(present.p_wisher) - 1);
         }).catch(
-            error => console.error(error)
+            error => this.wlApp.error(error, 'Fehler beim Löschen')
         );
     }
 

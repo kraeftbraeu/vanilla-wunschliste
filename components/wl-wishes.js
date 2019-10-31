@@ -2,6 +2,7 @@ import {html, render} from '../lit-html/lit-html.js';
 import { WlElement } from './wl-element.js';
 import { RestService } from '../services/rest.service.js';
 
+// TODO: delete button?
 export class WlWishes extends WlElement {
 
     get template() {
@@ -152,43 +153,15 @@ export class WlWishes extends WlElement {
                     wishToSave.w_id = json.content;
                     this.wishes.push(wishToSave);
                 }
-                this.wlApp.message('success', 'Änderungen erfolgreich gespeichert'); // TODO: oder raus?
                 render(this.template(), this);
             } else {
-                this.wlApp.message('danger', 'Fehler beim Speichern');
-                console.error(json);
+                this.wlApp.error('error in createOrUpdate: ' + json, 'Fehler beim Speichern');
                 render(this.template(), this);
             }
         }).catch(error => {
-            this.wlApp.message('danger', 'Fehler beim Speichern');
-            console.error(error);
+            this.wlApp.error(error, 'Fehler beim Speichern');
             render(this.template(), this);
         });
     }
-
-    /*clickedSaveNew()
-    {
-        const wish = {
-            "w_descr": this.querySelector('tbody tr:last-child td:nth-child(1) input').value,
-            "w_link": this.querySelector('tbody tr:last-child td:nth-child(2) input').value,
-            "w_user": this.wlApp.currentUser.id
-        };
-        RestService.createOrUpdate(wish, -1, 'wish').then(json => {
-            if(Number.isInteger(json) && json >= 0) {
-                this.wlApp.message('success', 'Änderungen erfolgreich gespeichert'); // TODO: oder raus?
-                this.wishes.push(wish);
-                render(this.template(), this);
-            } else {
-                this.wlApp.message('danger', 'Fehler beim Speichern');
-                console.error(json);
-                render(this.template(), this);
-            }
-            render(this.template(), this);
-        }).catch(error => {
-            this.wlApp.message('danger', 'Fehler beim Speichern');
-            console.error(error);
-            render(this.template(), this);
-        });
-    }*/
 }
 customElements.define("wl-wishes", WlWishes);

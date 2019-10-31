@@ -4,11 +4,11 @@ import { WlElement } from './wl-element.js';
 export class WlHome extends WlElement
 {
     get template() {
-        return (currentUser, year) => html`
+        return html`
 <div class="panel panel-default">
-    <div class="panel-heading">Willkommen bei Krämer Wunschliste ${year}</div>
+    <div class="panel-heading">Willkommen bei Krämer Wunschliste ${this.year}</div>
     <div class="panel-body">
-        <h1>Hallo ${currentUser==null?null:currentUser.username}!</h1>
+        <h1>Hallo ${this.currentUser==null?null:this.currentUser.username}!</h1>
     </div>
 </div>
 <div class="panel panel-default">
@@ -52,7 +52,9 @@ export class WlHome extends WlElement
 
     connectedCallback()
     {
-        render(this.template(this.wlApp.currentUser, 2019), this);
+        this.currentUser = this.wlApp.currentUser;
+        this.year = new Date().getFullYear();
+        render(this.template, this);
     }
 
     clickedDoubleCheckSubmit()

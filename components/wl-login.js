@@ -32,6 +32,7 @@ export class WlLogin extends WlElement
     connectedCallback()
     {
         // reset login status
+        console.log('logout');
         this.wlApp.currentUser = null;
 
         render(this.template, this);
