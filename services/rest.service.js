@@ -82,11 +82,11 @@ export class RestService
             .then(RestService.assertValidJsonResponseAndUpdateToken);
     }
 
-    static delete(dbObject, id, tablename)
+    static delete(id, tablename)
     {
         let headers = RestService.getRequestOptions(false);
         headers.method = 'DELETE';
-        fetch(RestService.serverUrl + tablename + "/" + id, headers)
+        return fetch(RestService.serverUrl + tablename + "/" + id, headers)
             .then(() => console.log('deleted ' + tablename + ' ' + id))
             .catch((error) => console.error(error));
 
@@ -101,7 +101,7 @@ export class RestService
                 .then(() => console.log('deleted presents for wish#' + wish.id))
                 .catch((error) => console.error(error));
         }
-        return RestService.delete(wish, 'wish');
+        return RestService.delete(wish.w_id, 'wish');
     }
 
     static handleError(error)

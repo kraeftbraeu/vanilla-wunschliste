@@ -10,7 +10,7 @@ export class WlPresents extends WlElement {
         <div class="panel-heading">
             ${this.isChangeFilters
                 ? 'Wen beschenkst du?'
-                : 'Was schenkst du' + (this.selectedUser ? this.selectedUser.name + '?' : '...?')}
+                : 'Was schenkst du ' + (this.selectedUser ? this.selectedUser.u_name + '?' : '...?')}
         </div>
     
         <div class="panel-body">
@@ -69,36 +69,36 @@ export class WlPresents extends WlElement {
                             </tr>
                         `)}
                         <tr class="no-hover">
-                            <td colspan=3 style="text-align:center">Hier können Geschenke eingegeben werden, die nicht vom Wünscher selbst formuliert wurden:</td>
+                            <td colspan=3 style="text-align:center">Hier können Geschenke eingegeben werden, die sich ${this.selectedUser.u_name} nicht selbst gewünscht hat:</td>
                         </tr>
                         ${this.selectedUserUnwishedPresents.map((present, i) => {
-                            html`<tr>
+                            return html`<tr id="u${i}">
                                 <td>
                                     ${this.selectedPresent && this.selectedPresent == present 
-                                        ? html`<input type="text" placeholder="Beschreibung" value="${this.selectedPresent.p_descr}">`
-                                        : present.p_descr}
+                                        ? html`<input type="text" placeholder="Beschreibung" style='width:100%' value="${this.selectedPresent.p_pdescr}">`
+                                        : present.p_pdescr}
                                 </td>
                                 <td>
                                     ${this.selectedPresent
                                         ? this.selectedPresent == present
-                                            ? html`<input type="text" placeholder="URL (Optional)" value="${this.selectedPresent.p_link}">`
-                                            : present.p_link
+                                            ? html`<input type="text" placeholder="URL (Optional)" style='width:100%' value="${this.selectedPresent.p_plink}">`
+                                            : present.p_plink
                                         : html`
                                             <span>
-                                                <a target="_blank" href="${present.p_link}">${present.p_link}</a>
+                                                <a target="_blank" href="${present.p_plink}">${present.p_plink}</a>
                                             </span>
                                         `}
                                 </td>
                                 <td>
                                     ${this.getGiverForPresent(present)}
-                                    ${present.p_giver === currentUserId
+                                    ${present.p_giver === this.currentUserId
                                         ? this.selectedPresent && this.selectedPresent===present
                                             ? html`
                                                 <button @click=${() => this.clickedSaveEdit(i, present)} class="btn btn-default">
-                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                                    <span class="glyphicon glyphicon-floppy-saved" aria-hidden="true"></span>
                                                 </button>
                                                 <button @click=${() => this.clickedResetEdit(i, present)} class="btn btn-default">
-                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                    <span class="glyphicon glyphicon-floppy-remove" aria-hidden="true"></span>
                                                 </button>`
                                             : html`
                                                 <button @click=${() => this.clickedEdit(present)} class="btn btn-default" ?disabled=${this.selectedPresent && this.selectedPresent!==present}>
@@ -113,9 +113,10 @@ export class WlPresents extends WlElement {
                         })}
                         <tr class="no-hover">
                             <td>
-                                <button *ngIf="!this.selectedPresent" (click)="clickedAddNew()" class="btn btn-default">
-                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                </button>
+                                ${this.selectedPresent ? '' : html`
+                                    <button @click=${() => this.clickedAddNew()} class="btn btn-default">
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                    </button>`}
                             </td>
                             <td></td>
                             <td></td>
@@ -127,14 +128,11 @@ export class WlPresents extends WlElement {
     </div>`;
     }
 
-    setCountWishesMap(userid, count) {
-        this[userid] = count;
-    }
-
     connectedCallback() {
         const currentUser = this.wlApp.currentUser
         if(currentUser === null)
         {
+            // TODO: generisch zu loginseite routen
             this.wlApp.error('currentUser is null!', 'Kein angemeldeter Benutzer gefunden. Bitte neu anmelden.');
             return;
         }
@@ -158,7 +156,6 @@ export class WlPresents extends WlElement {
                 else if (a.u_name > b.u_name) return 1;
                 else return 0;
             });
-            // output: allUsers, otherUsers
 
             Promise.all([RestService.readWishes(null), RestService.readAllPresents()])
             .then(values => {
@@ -199,7 +196,7 @@ export class WlPresents extends WlElement {
                     }
                 );
 
-                render(this.template, this);
+                this.render();
 
             })
             .catch(
@@ -208,6 +205,10 @@ export class WlPresents extends WlElement {
         }).catch(
             error => this.wlApp.error(error, 'Ein Fehler ist aufgetreten')
         );
+    }
+
+    render() {
+        render(this.template, this);
     }
 
     setChangeFilters()
@@ -221,7 +222,7 @@ export class WlPresents extends WlElement {
             this.selectedUserWishes = null;
         }
         this.isChangeFilters = !this.isChangeFilters;
-        render(this.template, this);
+        this.render();
     }
 
     clickedUser(user)
@@ -230,7 +231,7 @@ export class WlPresents extends WlElement {
             this.doSelectFilter(user);
         else
             this.doSelectUser(user);
-        render(this.template, this);
+        this.render();
     }
     
     doSelectFilter(user)
@@ -239,10 +240,11 @@ export class WlPresents extends WlElement {
         if(index !== -1)
         {
             // remove
-            RestService.delete(this.filters[index]).then(
+            RestService.delete(this.filters[index].f_id, 'filter').then(
                 result => {
                     this.filters.splice(index, 1);
                     this.filteredUserIds.splice(index, 1);
+                    this.render();
             }).catch(
                 error => this.wlApp.error(error, 'Fehler beim Löschen')
             );
@@ -255,11 +257,12 @@ export class WlPresents extends WlElement {
                 f_giver: this.currentUserId,
                 f_wisher: user.u_id
             };
-            RestService.createOrUpdate(newFilter).then(
+            RestService.createOrUpdate(newFilter, newFilter.f_id, 'filter').then(
                 result => {
                     newFilter.f_id = result;
                     this.filters.push(newFilter);
                     this.filteredUserIds.push(newFilter.f_wisher);
+                    this.render();
             }).catch(
                 error => this.wlApp.error(error, 'Fehler beim Speichern')
             );
@@ -321,13 +324,13 @@ export class WlPresents extends WlElement {
             p_pdescr: wish.w_descr,
             p_plink: wish.w_link
         };
-        RestService.createOrUpdate(presentToStore, null, 'present').then(
+        RestService.createOrUpdate(presentToStore, presentToStore.p_id, 'present').then(
             result => {
-                present.p_id = result;
-                this.presentsOfCurrentUser.push(present);
-                this.selectedUserPresents.push(present);
-                this.countPresentsByCurrentUserMap.set(present.p_wisher, this.countPresentsByCurrentUserMap.get(present.p_wisher) + 1);
-                render(this.template, this);
+                presentToStore.p_id = result;
+                this.presentsOfCurrentUser.push(presentToStore);
+                this.selectedUserPresents.push(presentToStore);
+                this.countPresentsByCurrentUserMap[presentToStore.p_wisher]++;
+                this.render();
         }).catch(
             error => this.wlApp.error(error, 'Fehler beim Speichern')
         );
@@ -337,11 +340,12 @@ export class WlPresents extends WlElement {
         const presentToDelete = this.presentsOfCurrentUser.find(
             present => present.p_wish === wish.w_id
         );
-        RestService.delete(presentToDelete, 'present').then(
+        RestService.delete(presentToDelete.p_id, 'present').then(
             result => {
-                this.presentsOfCurrentUser.splice(this.presentsOfCurrentUser.findIndex(p => p === present), 1);
-                this.selectedUserPresents.splice(this.selectedUserPresents.findIndex(p => p === present), 1);
-                this.countPresentsByCurrentUserMap.set(present.p_wisher, this.countPresentsByCurrentUserMap.get(present.p_wisher) - 1);
+                this.presentsOfCurrentUser.splice(this.presentsOfCurrentUser.findIndex(p => p === presentToDelete), 1);
+                this.selectedUserPresents.splice(this.selectedUserPresents.findIndex(p => p === presentToDelete), 1);
+                this.countPresentsByCurrentUserMap[presentToDelete.p_wisher]--;
+                this.render();
         }).catch(
             error => this.wlApp.error(error, 'Fehler beim Speichern')
         );
@@ -350,39 +354,44 @@ export class WlPresents extends WlElement {
     clickedEdit(present)
     {
         this.selectedPresent = present;
-        this.oldDescr = present.p_descr;
-        this.oldLink = present.p_link;
+        this.render();
     }
 
     clickedResetEdit(index, present)
     {
         if(index > -1 && present.p_id <= 0)
         {
-            // remove from list, if not yet persistent
+            // simply remove from list, if not yet persistent
             this.selectedUserUnwishedPresents.splice(index, 1);
-            this.countWishesMap.set(present.p_wisher, this.countWishesMap.get(present.p_wisher) - 1);
-            this.countPresentsByCurrentUserMap.set(present.p_wisher, this.countPresentsByCurrentUserMap.get(present.p_wisher) - 1);
+            this.countWishesMap[present.p_wisher]--;
+            this.countPresentsByCurrentUserMap[present.p_wisher]--;
         }
-
         this.selectedPresent = null;
-        this.oldDescr = null;
-        this.oldLink = null;
+        this.render();
     }
 
-    clickedSaveEdit(index, present)
+    clickedSaveEdit(i, present)
     {
-        RestService.createOrUpdate(present).then(
-            result => {}
+        const tr = this.querySelector(present && i >= 0
+            ? 'tbody tr#u' + i
+            : 'tbody tr:last-child');
+        let presentToSave = {
+            "p_giver": present.p_giver,
+            "p_id": present.p_id,
+            "p_pdescr": tr.querySelector('td:nth-child(1) input').value,
+            "p_plink": tr.querySelector('td:nth-child(2) input').value,
+            "p_wish": present.p_wish,
+            "p_wisher": present.p_wisher
+        };
+        RestService.createOrUpdate(presentToSave, presentToSave.p_id, 'present').then(
+            result => {
+                this.selectedUserUnwishedPresents[i] = presentToSave;
+                this.selectedPresent = null;
+                this.render();
+            }
         ).catch(
             error => {
                 this.wlApp.error(error, 'Fehler beim Speichern');
-                present.p_descr = this.oldDescr;
-                present.p_link = this.oldLink;
-            },
-            () => {
-                console.log(error);
-                this.oldDescr = null;
-                this.oldLink = null;
                 this.selectedPresent = null;
             }
         );
@@ -390,12 +399,12 @@ export class WlPresents extends WlElement {
 
     clickedRemove(index, present)
     {
-        RestService.delete(present).then(
+        RestService.delete(present.p_id, 'present').then(
             result => {
-                console.log('deleted present#' + present.p_id);
                 this.selectedUserUnwishedPresents.splice(index, 1);
-                this.countWishesMap.set(present.p_wisher, this.countWishesMap.get(present.p_wisher) - 1);
-                this.countPresentsByCurrentUserMap.set(present.p_wisher, this.countPresentsByCurrentUserMap.get(present.p_wisher) - 1);
+                this.countWishesMap[present.p_wisher]--;
+                this.countPresentsByCurrentUserMap[present.p_wisher]--;
+                this.render();
         }).catch(
             error => this.wlApp.error(error, 'Fehler beim Löschen')
         );
@@ -411,9 +420,10 @@ export class WlPresents extends WlElement {
             p_pdescr: '',
             p_plink: ''
         };
+        console.log(present);
         this.selectedUserUnwishedPresents.push(present);
-        this.countWishesMap.set(present.p_wisher, this.countWishesMap.get(present.p_wisher) + 1);
-        this.countPresentsByCurrentUserMap.set(present.p_wisher, this.countPresentsByCurrentUserMap.get(present.p_wisher) + 1);
+        this.countWishesMap[present.p_wisher]++;
+        this.countPresentsByCurrentUserMap[present.p_wisher]++;
         
         this.clickedEdit(present);
     }
