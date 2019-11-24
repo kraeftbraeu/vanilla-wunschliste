@@ -8,6 +8,11 @@ import { JwtService } from '../services/jwt.service.js';
 
 export default class WlApp extends HTMLElement
 {
+
+    constructor() {
+        super();
+        this.jwtService = new JwtService();
+    }
     get template() {
         return html`
         <nav class="navbar navbar-default">
@@ -58,7 +63,7 @@ export default class WlApp extends HTMLElement
     set token(token) {
         // store user details and jwt token in local storage to keep user logged in between page refreshes
         if(token) {
-            let decodedJwt = JwtService.decodeJwt(token);
+            let decodedJwt = this.jwtService.decodeJwt(token);
             this.currentUser = {
                 "id": decodedJwt.u_id,
                 "username": decodedJwt.u_name,

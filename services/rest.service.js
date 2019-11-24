@@ -2,11 +2,11 @@
 
 export class RestService
 {
-    static serverUrl = "api.php/";
-    static serverUrl = "http://127.0.0.1:3000/?path=";
-    //static serverUrl = environment.apiUrl + "api.php/";
+    //serverUrl = "api.php/";
+    //serverUrl = "http://127.0.0.1:3000/?path=";
+    serverUrl = "https://mk4-a.srv.sixhop.net/restservice/api.php/";
 
-    static assertValidJsonResponse(response) {
+    assertValidJsonResponse(response) {
         if(!response) {
             throw new Error('response may not be empty');
         }
@@ -20,7 +20,7 @@ export class RestService
         });
     }
 
-    static assertValidJsonResponseAndUpdateToken(response) {
+    assertValidJsonResponseAndUpdateToken(response) {
         if(!response) {
             throw new Error('response may not be empty');
         }
@@ -35,76 +35,88 @@ export class RestService
         });
     }
 
-    static readUsers()
+    readUsers()
     {
-        return fetch(RestService.serverUrl + 'user/', RestService.getRequestOptions(true))
-            .then(RestService.assertValidJsonResponse)
-            .catch(RestService.handleError);
+        return fetch(this.serverUrl + 'user/', {
+            headers: this.getRequestOptions(true)
+        })
+            .then(this.assertValidJsonResponse)
+            .catch(this.handleError);
     }
 
-    static readWishes(userId)
+    readWishes(userId)
     {
-        return fetch(RestService.serverUrl + (userId === null ? 'wish/' : 'wish/w_user/' + userId), RestService.getRequestOptions(true))
-            .then(RestService.assertValidJsonResponse)
-            .catch(RestService.handleError);
+        return fetch(this.serverUrl + (userId === null ? 'wish/' : 'wish/w_user/' + userId), {
+            headers: this.getRequestOptions(true)
+        })
+            .then(this.assertValidJsonResponse)
+            .catch(this.handleError);
     }
 
-    static readAllPresents()
+    readAllPresents()
     {
-        return fetch(RestService.serverUrl + 'present/', RestService.getRequestOptions(true))
-            .then(RestService.assertValidJsonResponse)
-            .catch(RestService.handleError);
+        return fetch(this.serverUrl + 'present/', {
+            headers: this.getRequestOptions(true)
+        })
+            .then(this.assertValidJsonResponse)
+            .catch(this.handleError);
     }
 
-    static readPresents(userId, isForGiver)
+    readPresents(userId, isForGiver)
     {
-        return fetch(RestService.serverUrl + (isForGiver ? 'present/p_giver/' : 'present/p_wisher/') + userId, RestService.getRequestOptions(true))
-            .then(RestService.assertValidJsonResponse)
-            .catch(RestService.handleError);
+        return fetch(this.serverUrl + (isForGiver ? 'present/p_giver/' : 'present/p_wisher/') + userId, {
+            headers: this.getRequestOptions(true)
+        })
+            .then(this.assertValidJsonResponse)
+            .catch(this.handleError);
     }
 
-    static readFiltersForGiver(giverId)
+    readFiltersForGiver(giverId)
     {
-        return fetch(RestService.serverUrl + 'filter/f_giver/' + giverId, RestService.getRequestOptions(true))
-            .then(RestService.assertValidJsonResponse)
-            .catch(RestService.handleError);
+        return fetch(this.serverUrl + 'filter/f_giver/' + giverId, {
+            headers: this.getRequestOptions(true)
+        })
+            .then(this.assertValidJsonResponse)
+            .catch(this.handleError);
     }
 
     /** return the id */
-    static createOrUpdate(dbObject, id, tablename)
+    createOrUpdate(dbObject, id, tablename)
     {
-        let headers = RestService.getRequestOptions(true);
-        headers.method = 'POST';
-        headers.body = JSON.stringify(dbObject);
-
-        const path = id <= 0 ? RestService.serverUrl + tablename : RestService.serverUrl + tablename + '/' + id;
-        return fetch(path, headers)
-            .then(RestService.assertValidJsonResponseAndUpdateToken);
+        const path = id <= 0 ? this.serverUrl + tablename : this.serverUrl + tablename + '/' + id;
+        return fetch(path, {
+            method: 'POST',
+            headers: this.getRequestOptions(true),
+            body: JSON.stringify(dbObject)
+        })
+            .then(this.assertValidJsonResponseAndUpdateToken);
     }
 
-    static delete(id, tablename)
+    delete(id, tablename)
     {
-        let headers = RestService.getRequestOptions(false);
-        headers.method = 'DELETE';
-        return fetch(RestService.serverUrl + tablename + "/" + id, headers)
+        return fetch(this.serverUrl + tablename + "/" + id, {
+            method: 'DELETE',
+            headers: this.getRequestOptions(false)
+        })
             .then(() => console.log('deleted ' + tablename + ' ' + id))
             .catch((error) => console.error(error));
 
     }
 
-    static deleteWish(wish, isForceDeletion)
+    deleteWish(wish, isForceDeletion)
     {
         if(isForceDeletion) {
-            let headers = RestService.getRequestOptions(false);
-            headers.method = 'DELETE';
-            fetch(RestService.serverUrl + 'present/p_wish/' + wish.id, headers)
+            fetch(this.serverUrl + 'present/p_wish/' + wish.id, {
+                method: 'DELETE',
+                headers: this.getRequestOptions(false)
+            })
                 .then(() => console.log('deleted presents for wish#' + wish.id))
                 .catch((error) => console.error(error));
         }
-        return RestService.delete(wish.w_id, 'wish');
+        return this.delete(wish.w_id, 'wish');
     }
 
-    static handleError(error)
+    handleError(error)
     {
         console.error(error);
         //console.log("handleError: " + JSON.stringify(error));
@@ -123,7 +135,7 @@ export class RestService
         return errorMsg;
     }
 
-    static getRequestOptions(addContentTypeJson)
+    getRequestOptions(addContentTypeJson)
     {
         // create authorization header with jwt token
         let loginUser = document.getElementsByTagName('wl-app')[0].currentUser;

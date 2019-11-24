@@ -1,6 +1,6 @@
 export class JwtService
 {
-    static decodeJwt(jwt)
+    decodeJwt(jwt)
     {
         let parts = jwt.split('.');
 
@@ -14,7 +14,7 @@ export class JwtService
         return JSON.parse(decoded);
     }
 
-    static urlBase64Decode(str)
+    urlBase64Decode(str)
     {
         let output = str.replace(/-/g, '+').replace(/_/g, '/');
         switch (output.length % 4)
@@ -28,7 +28,7 @@ export class JwtService
     }
 
     // https://developer.mozilla.org/en/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_Unicode_Problem
-    static b64DecodeUnicode(str)
+    b64DecodeUnicode(str)
     {
         return decodeURIComponent(Array.prototype.map.call(this.b64decode(str), (c) => {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
@@ -36,7 +36,7 @@ export class JwtService
     }
 
     // credits for decoder goes to https://github.com/atk
-    static b64decode(str)
+    b64decode(str)
     {
         let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
         let output = '';

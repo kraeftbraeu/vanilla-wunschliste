@@ -1,8 +1,14 @@
 import {html, render} from '../lit-html/lit-html.js';
 import { WlElement } from './wl-element.js';
+import { AuthService } from '../services/auth.service.js'
 
 export class WlHome extends WlElement
 {
+    constructor() {
+        super();
+        this.authService = new AuthService();
+    }
+
     get template() {
         return html`
 <div class="panel panel-default">
@@ -84,7 +90,7 @@ export class WlHome extends WlElement
     clickedChangePassword()
     {
         document.getElementById('loading').classList.remove('invisible');
-        AuthService.changePassword(document.getElementById('wlpw1').value)
+        this.authService.changePassword(document.getElementById('wlpw1').value)
         .then(
             () => {
                 AlertService.success("Das Ändern des Passworts war erfolgreich.");

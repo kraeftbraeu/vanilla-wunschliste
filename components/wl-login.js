@@ -5,6 +5,11 @@ import { AuthService } from '../services/auth.service.js';
 
 export class WlLogin extends WlElement
 {
+    constructor() {
+        super();
+        this.authService = new AuthService();
+    }
+
     get template() {
         return html`
         <div class="panel panel-default">
@@ -54,7 +59,7 @@ export class WlLogin extends WlElement
             }
         } else {
             //this.loading = true;
-            AuthService.login(document.getElementById('wlun').value, document.getElementById('wlpw').value)
+            this.authService.login(document.getElementById('wlun').value, document.getElementById('wlpw').value)
             .then(
                 () => document.getElementsByTagName('wl-app')[0].connectedCallback()
             )

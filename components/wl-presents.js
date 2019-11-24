@@ -4,6 +4,10 @@ import { RestService } from '../services/rest.service.js';
 
 export class WlPresents extends WlElement {
 
+    constructor() {
+        super();
+        this.restService = new RestService();
+    }
     get template() {
         return html`
     <div class="panel panel-default">
@@ -138,7 +142,7 @@ export class WlPresents extends WlElement {
         }
         this.currentUserId = currentUser.id;
 
-        RestService.readFiltersForGiver(this.currentUserId).then(filters => {
+        this.restService.readFiltersForGiver(this.currentUserId).then(filters => {
             this.filters = filters
             this.filteredUserIds = filters.map(
                 filter => filter.f_wisher
@@ -147,7 +151,7 @@ export class WlPresents extends WlElement {
             error => this.wlApp.error(error, 'Ein Fehler ist aufgetreten')
         );
 
-        RestService.readUsers().then(users => {
+        this.restService.readUsers().then(users => {
             this.allUsers = users;
             this.otherUsers = users.filter(
                 user => user.u_id !== this.currentUserId
@@ -157,7 +161,7 @@ export class WlPresents extends WlElement {
                 else return 0;
             });
 
-            Promise.all([RestService.readWishes(null), RestService.readAllPresents()])
+            Promise.all([this.restService.readWishes(null), this.restService.readAllPresents()])
             .then(values => {
                 let wishes = values[0];
 
@@ -240,7 +244,7 @@ export class WlPresents extends WlElement {
         if(index !== -1)
         {
             // remove
-            RestService.delete(this.filters[index].f_id, 'filter').then(
+            this.restService.delete(this.filters[index].f_id, 'filter').then(
                 result => {
                     this.filters.splice(index, 1);
                     this.filteredUserIds.splice(index, 1);
@@ -257,7 +261,7 @@ export class WlPresents extends WlElement {
                 f_giver: this.currentUserId,
                 f_wisher: user.u_id
             };
-            RestService.createOrUpdate(newFilter, newFilter.f_id, 'filter').then(
+            this.restService.createOrUpdate(newFilter, newFilter.f_id, 'filter').then(
                 result => {
                     newFilter.f_id = result;
                     this.filters.push(newFilter);
@@ -324,7 +328,7 @@ export class WlPresents extends WlElement {
             p_pdescr: wish.w_descr,
             p_plink: wish.w_link
         };
-        RestService.createOrUpdate(presentToStore, presentToStore.p_id, 'present').then(
+        this.restService.createOrUpdate(presentToStore, presentToStore.p_id, 'present').then(
             result => {
                 presentToStore.p_id = result;
                 this.presentsOfCurrentUser.push(presentToStore);
@@ -340,7 +344,7 @@ export class WlPresents extends WlElement {
         const presentToDelete = this.presentsOfCurrentUser.find(
             present => present.p_wish === wish.w_id
         );
-        RestService.delete(presentToDelete.p_id, 'present').then(
+        this.restService.delete(presentToDelete.p_id, 'present').then(
             result => {
                 this.presentsOfCurrentUser.splice(this.presentsOfCurrentUser.findIndex(p => p === presentToDelete), 1);
                 this.selectedUserPresents.splice(this.selectedUserPresents.findIndex(p => p === presentToDelete), 1);
@@ -383,7 +387,7 @@ export class WlPresents extends WlElement {
             "p_wish": present.p_wish,
             "p_wisher": present.p_wisher
         };
-        RestService.createOrUpdate(presentToSave, presentToSave.p_id, 'present').then(
+        this.restService.createOrUpdate(presentToSave, presentToSave.p_id, 'present').then(
             result => {
                 this.selectedUserUnwishedPresents[i] = presentToSave;
                 this.selectedPresent = null;
@@ -399,7 +403,7 @@ export class WlPresents extends WlElement {
 
     clickedRemove(index, present)
     {
-        RestService.delete(present.p_id, 'present').then(
+        this.restService.delete(present.p_id, 'present').then(
             result => {
                 this.selectedUserUnwishedPresents.splice(index, 1);
                 this.countWishesMap[present.p_wisher]--;

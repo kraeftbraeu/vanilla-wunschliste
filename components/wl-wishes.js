@@ -5,6 +5,11 @@ import { RestService } from '../services/rest.service.js';
 // TODO: delete button?
 export class WlWishes extends WlElement {
 
+    constructor() {
+        super();
+        this.restService = new RestService();
+    }
+
     get template() {
         return (editWish = null) => {
             return html`
@@ -103,12 +108,12 @@ export class WlWishes extends WlElement {
         if(currentUser == null) {
             document.getElementsByTagName('wl-app')[0].connectedCallback(); // TODO: test
         } else {
-            RestService.readWishes(currentUser.id)
+            this.restService.readWishes(currentUser.id)
             .then(json => {
                 this.wishes = json;
                 render(this.template(), this);
             });
-            /*RestService.readPresents(currentUser.id, false)
+            /*this.restService.readPresents(currentUser.id, false)
             .then(
                 presents => {
                     this.acceptedWishIds = presents.content.map(present => present.p_wish).filter(wishId => wishId >= 0)
@@ -144,7 +149,7 @@ export class WlWishes extends WlElement {
         if(wish && i >= 0) {
             wishToSave.id = wish.w_id;
         }
-        RestService.createOrUpdate(wishToSave, wish ? wish.w_id : -1, 'wish').then(json => {
+        this.restService.createOrUpdate(wishToSave, wish ? wish.w_id : -1, 'wish').then(json => {
             if(Number.isInteger(json) && json >= 0) {
                 if(wish && i >= 0) {
                     this.wishes[i].w_descr = this.querySelector('tbody tr:nth-child(' + i + ') td:nth-child(1) input').value;
