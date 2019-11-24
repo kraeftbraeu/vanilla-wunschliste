@@ -139,7 +139,7 @@ export class WlWishes extends WlElement {
     clickedSave(i = -1, wish = null)
     {
         const tr = this.querySelector(wish && i >= 0
-            ? 'tbody tr:nth-child(' + i + ')'
+            ? 'tbody tr:nth-child(' + (i+1) + ')'
             : 'tbody tr:last-child');
         let wishToSave = {
             "w_descr": tr.querySelector('td:nth-child(1) input').value,
@@ -147,13 +147,13 @@ export class WlWishes extends WlElement {
             "w_user": this.wlApp.currentUser.id
         };
         if(wish && i >= 0) {
-            wishToSave.id = wish.w_id;
+            wishToSave.w_id = wish.w_id;
         }
         this.restService.createOrUpdate(wishToSave, wish ? wish.w_id : -1, 'wish').then(json => {
             if(Number.isInteger(json) && json >= 0) {
                 if(wish && i >= 0) {
-                    this.wishes[i].w_descr = this.querySelector('tbody tr:nth-child(' + i + ') td:nth-child(1) input').value;
-                    this.wishes[i].w_link = this.querySelector('tbody tr:nth-child(' + i + ') td:nth-child(2) input').value;
+                    this.wishes[i].w_descr = this.querySelector('tbody tr:nth-child(' + (i+1) + ') td:nth-child(1) input').value;
+                    this.wishes[i].w_link = this.querySelector('tbody tr:nth-child(' + (i+1) + ') td:nth-child(2) input').value;
                 } else {
                     wishToSave.w_id = json.content;
                     this.wishes.push(wishToSave);

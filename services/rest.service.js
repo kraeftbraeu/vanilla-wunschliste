@@ -84,8 +84,9 @@ export class RestService
     createOrUpdate(dbObject, id, tablename)
     {
         const path = id <= 0 ? this.serverUrl + tablename : this.serverUrl + tablename + '/' + id;
+        const method = id <= 0 ? 'POST' : 'PUT';
         return fetch(path, {
-            method: 'POST',
+            method: method,
             headers: this.getRequestOptions(true),
             body: JSON.stringify(dbObject)
         })

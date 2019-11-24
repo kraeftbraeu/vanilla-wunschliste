@@ -8,6 +8,7 @@ export class WlPresents extends WlElement {
         super();
         this.restService = new RestService();
     }
+
     get template() {
         return html`
     <div class="panel panel-default">
@@ -363,7 +364,8 @@ export class WlPresents extends WlElement {
 
     clickedResetEdit(index, present)
     {
-        if(index > -1 && present.p_id <= 0)
+        console.log(index, present, present.p_id === undefined, present.p_id < 0);
+        if(index > -1 && (present.p_id === undefined || present.p_id < 0))
         {
             // simply remove from list, if not yet persistent
             this.selectedUserUnwishedPresents.splice(index, 1);
@@ -381,14 +383,17 @@ export class WlPresents extends WlElement {
             : 'tbody tr:last-child');
         let presentToSave = {
             "p_giver": present.p_giver,
-            "p_id": present.p_id,
             "p_pdescr": tr.querySelector('td:nth-child(1) input').value,
             "p_plink": tr.querySelector('td:nth-child(2) input').value,
             "p_wish": present.p_wish,
             "p_wisher": present.p_wisher
         };
-        this.restService.createOrUpdate(presentToSave, presentToSave.p_id, 'present').then(
+        if(present.p_id >= 0) {
+            presentToSave.p_id = present.p_id;
+        }
+        this.restService.createOrUpdate(presentToSave, present.p_id, 'present').then(
             result => {
+                presentToSave.p_id = result;
                 this.selectedUserUnwishedPresents[i] = presentToSave;
                 this.selectedPresent = null;
                 this.render();
@@ -418,9 +423,9 @@ export class WlPresents extends WlElement {
     {
         let present = {
             p_id: -1,
+            p_wishid: -1,
             p_wisher: this.selectedUser.u_id,
             p_giver: this.currentUserId,
-            p_wish: -1,
             p_pdescr: '',
             p_plink: ''
         };
