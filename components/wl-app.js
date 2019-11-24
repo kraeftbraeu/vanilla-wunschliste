@@ -18,7 +18,7 @@ export default class WlApp extends HTMLElement
         <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <button type="button" class="navbar-toggle">
+                    <button type="button" class="navbar-toggle" @click=${() => this.toggleMenu()}>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
@@ -58,6 +58,15 @@ export default class WlApp extends HTMLElement
             </div>
         </footer>
         `;
+    }
+
+    toggleMenu() {
+        const menu = document.getElementById('myNavbar');
+        if(menu.classList.contains('in')) {
+            menu.classList.remove('in');
+        } else {
+            menu.classList.add('in');
+        }
     }
 
     set token(token) {
@@ -111,6 +120,7 @@ export default class WlApp extends HTMLElement
     }
 
     openPage(page) {
+        this.toggleMenu();
         console.log('open ' + page);
         const content = document.getElementById('wl-content');
         if(content) {
